@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User: Lưu trữ thông tin người dùng bao gồm email, mật khẩu, họ tên, ngày tạo, ngày cập nhật và các quan hệ với các bảng khác (orders, addresses, cartItems).
+// Order: Lưu trữ thông tin đơn đặt hàng bao gồm ID người dùng, trạng thái đơn hàng (Pending, Preparing, Delivered), ngày tạo, ngày cập nhật và các quan hệ với các bảng khác (user, orderItems, address).
+// OrderItem: Lưu trữ chi tiết các món ăn trong đơn hàng, bao gồm ID đơn hàng, ID món ăn, số lượng, giá, ngày tạo, ngày cập nhật và các quan hệ với các bảng khác (order, dish).
+// Dish: Lưu trữ thông tin món ăn bao gồm tên, mô tả, giá, đường dẫn ảnh, ngày tạo, ngày cập nhật và các quan hệ với các bảng khác (category, cartItems, orderItems).
+// Category: Lưu trữ thông tin danh mục món ăn bao gồm tên, ngày tạo, ngày cập nhật và quan hệ với bảng Dish.
+// CartItem: Lưu trữ thông tin các món ăn trong giỏ hàng của người dùng, bao gồm ID người dùng, ID món ăn, số lượng, ngày tạo, ngày cập nhật và các quan hệ với các bảng khác (user, dish).
+// Address: Lưu trữ địa chỉ của người dùng, bao gồm ID người dùng, địa chỉ, thành phố, mã bưu điện, ngày tạo, ngày cập nhật và các quan hệ với các bảng khác (user, orders).
+// OrderStatus: Enum xác định trạng thái của đơn hàng.
+
+// Cách sử dụng:
+// Khởi tạo cơ sở dữ liệu: npx prisma db push
+// Tạo client Prisma: npx prisma generate
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  password String
+  email    String  @unique
+
+  firstName String? @map("first_name")
+  lastName  String? @map("last_name")
+
+  orders    Order[]
+  addresses Address[]
+  cartItems CartItem[]
+
+  @@map("users")
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  status    OrderStatus @default(Pending)
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  userId     Int         @map("user_id")
+  user       User        @relation(fields: [userId], references: [id])
+  orderItems OrderItem[]
+  addressId  Int         @map("address_id")
+  address    Address     @relation(fields: [addressId], references: [id])
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   Int      @map("order_id")
+  dishId    Int      @map("dish_id")
+  quantity  Int
+  price     Decimal  @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id])
+  dish  Dish  @relation(fields: [dishId], references: [id])
+
+  @@map("order_items")
+}
+
+model Dish {
+  id          Int      @id @default(autoincrement()) @map("dish_id")
+  name        String
+  description String
+  price       Decimal
+  imageUrl    String?  @map("image_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  categoryId Int         @map("category_id")
+  category   Category    @relation(fields: [categoryId], references: [id])
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  @@map("dishes")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  dishes Dish[]
+
+  @@map("categories")
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  dishId    Int      @map("dish_id")
+  quantity  Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id])
+  dish Dish @relation(fields: [dishId], references: [id])
+
+  @@map("cart_items")
+}
+
+model Address {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  street     String
+  city       String
+  postalCode String   @map("postal_code")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  user   User    @relation(fields: [userId], references: [id])
+  orders Order[]
+
+  @@map("addresses")
+}
+
+model Bookmark {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("bookmarks")
+}
+
+enum OrderStatus {
+  Pending
+  Preparing
+  Delivered
+}
