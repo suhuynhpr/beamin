@@ -1,17 +1,22 @@
+
+version: '3.8'
+
 services:
-  dev-db:
+  some-postgres:
     image: postgres:14
-    ports:
-      - 5432:5432
+    container_name: some-postgres
     environment:
-      - POSTGRES_PASSWORD=S3cret
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=store
-  test-db:
-    image: postgres:14
+      POSTGRES_DB: db_ecom
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
     ports:
-      - 5435:5432
-    environment:
-      - POSTGRES_PASSWORD=S3cret
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=store
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    depends_on:
+      - some-postgres
+
+volumes:
+  postgres_data:

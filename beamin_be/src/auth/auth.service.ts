@@ -1,134 +1,91 @@
+//src/auth/auth.service.ts
 import {
-  ForbiddenException,
-  Injectable,
   ConflictException,
-} from '@nestjs/common'
-import { AuthDto } from './dto'
-import * as argon from 'argon2'
-import { PrismaService } from '../prisma//prisma.service'
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library'
-import { JwtService } from '@nestjs/jwt'
-import { ConfigService } from '@nestjs/config'
-import { ForbiddenExceptionMessage } from '../common/exception.enum'
-import { ErrorTypes } from 'src/common/error-types.enum'
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { JwtService } from '@nestjs/jwt';
+import { AuthEntity } from './entity/auth.entity';
+import * as bcrypt from 'bcrypt';
+import { SignupDto } from './dto/signup.dto';
+import { LoginDto } from './dto/login.dto';
+import { RefreshDto } from './dto/refresh.dto';
 
-@Injectable({})
+@Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
-    private jwt: JwtService,
-    private config: ConfigService,
+    private jwtService: JwtService,
   ) {}
 
-  async signup(dto: AuthDto) {
-    //find the user by email
-    const user =
-      await this.prisma.user.findUnique({
-        where: {
-          email: dto.email,
-        },
-      })
+  private generateAuthResponse(userId: number): AuthEntity {
+    const accessToken = this.jwtService.sign({ userId }, { expiresIn: '1h' });
+    const refreshToken = this.jwtService.sign({ userId }, { expiresIn: '7d' });
+    const accessTokenExp = this.jwtService.decode(accessToken)['exp'];
+    const expiresIn = accessTokenExp - Math.floor(Date.now() / 1000);
 
-    // if user does note exist throw exception
-    if (user)
-      throw new ConflictException({
-        message: ErrorTypes.EMAIL_ALREADY_EXISTS,
-      })
-    //generate the password hash
-    const hash = await argon.hash(dto.password)
-
-    try {
-      //save the new user to db
-      const user = await this.prisma.user.create({
-        data: {
-          email: dto.email,
-          password: hash,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-        },
-      })
-
-      const token = await this.signToken(
-        user.id,
-        user.email,
-      )
-
-      return {
-        message: 'User registered successfully',
-        data: { ...token },
-        total: 1,
-      }
-    } catch (error) {
-      if (
-        error instanceof
-        PrismaClientKnownRequestError
-      ) {
-        if (error.code === 'P2002') {
-          throw new ForbiddenException(
-            ForbiddenExceptionMessage.CredentialsTaken,
-          )
-        }
-      }
-
-      throw error
-    }
-  }
-  async signin(dto: AuthDto) {
-    //find the user by email
-    const user =
-      await this.prisma.user.findUnique({
-        where: {
-          email: dto.email,
-        },
-      })
-    // if user does note exist throw exception
-    if (!user)
-      throw new ForbiddenException(
-        ForbiddenExceptionMessage.CredentialsIncorrect,
-      )
-
-    //compare password
-    const pwMatches = await argon.verify(
-      user.password,
-      dto.password,
-    )
-    //if password incorecct throw exception
-    if (!pwMatches)
-      throw new ForbiddenException(
-        ForbiddenExceptionMessage.CredentialsIncorrect,
-      )
-    const token = await this.signToken(
-      user.id,
-      user.email,
-    )
     return {
-      message: 'User registered successfully',
-      data: { ...token },
-      total: 1,
-    }
-  }
-
-  async signToken(
-    userId: number,
-    email: string,
-  ): Promise<{ access_token: string }> {
-    const payload = {
-      sub: userId,
-      email,
-    }
-
-    const secret = this.config.get('JWT_SECRET')
-
-    const token = await this.jwt.signAsync(
-      payload,
-      {
-        expiresIn: '15m',
-        secret: secret,
+      success: true,
+      data: {
+        access_token: accessToken,
+        expires_in: expiresIn,
+        refresh_token: refreshToken,
+        user_id: userId,
       },
-    )
+    };
+  }
 
-    return {
-      access_token: token,
+  async login(body: LoginDto): Promise<AuthEntity> {
+    const { email, password } = body;
+    // Step 1: Fetch a user with the given email
+    const user = await this.prisma.user.findUnique({ where: { email: email } });
+
+    // If no user is found, throw an error
+    if (!user) {
+      throw new NotFoundException(`No user found for email: ${email}`);
     }
+
+    // Step 2: Check if the password is correct
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    // If password does not match, throw an error
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    return this.generateAuthResponse(user.id);
+  }
+
+  async signup(body: SignupDto): Promise<AuthEntity> {
+    const { email, password, name } = body;
+    // Step 1: Check if the email is already in use
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: email },
+    });
+    if (existingUser) {
+      throw new ConflictException('Email already in use');
+    }
+
+    // Step 2: Hash the password and create the user
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await this.prisma.user.create({
+      data: { name, email, password: hashedPassword },
+    });
+
+    return this.generateAuthResponse(user.id);
+  }
+
+  async refresh(body: RefreshDto): Promise<AuthEntity> {
+    const { refreshToken } = body;
+    const decoded = this.jwtService.verify(refreshToken);
+    const userId = decoded.userId;
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.generateAuthResponse(user.id);
   }
 }

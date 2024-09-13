@@ -1,39 +1,25 @@
-import { NestFactory } from '@nestjs/core'
-import { AppModule } from './app.module'
-import { ValidationPipe } from '@nestjs/common'
-import {
-  DocumentBuilder,
-  SwaggerModule,
-} from '@nestjs/swagger'
-import { TransformInterceptor } from './core/interceptor/transform.interceptor'
-import { ErrorInterceptor } from './core/interceptor/error.interceptor'
+// src/main.ts
+
+import { NestFactory, Reflector } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-    }),
-  )
-  app.enableCors()
+  const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const config = new DocumentBuilder()
-    .setTitle('Bookmarks API')
-    .setDescription('API for managing bookmarks')
-    .setVersion('1.0')
+    .setTitle('Beamin')
+    .setDescription('The Beamin API description')
+    .setVersion('0.1')
     .addBearerAuth()
-    .build()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
 
-  const document = SwaggerModule.createDocument(
-    app,
-    config,
-  )
-  SwaggerModule.setup('api', app, document)
-  // Áp dụng TransformInterceptor globally
-  app.useGlobalInterceptors(
-    new TransformInterceptor(),
-    new ErrorInterceptor(),
-  )
-  await app.listen(3000)
+  await app.listen(3000);
 }
-bootstrap()
+bootstrap();
