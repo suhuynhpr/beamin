@@ -19,14 +19,6 @@ import { ArticleEntity } from './entities/article.entity';
 export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
-  @Post()
-  @ApiCreatedResponse({ type: ArticleEntity })
-  async create(@Body() createArticleDto: CreateArticleDto) {
-    return new ArticleEntity(
-      await this.articlesService.create(createArticleDto),
-    );
-  }
-
   @Get()
   @ApiOkResponse({ type: ArticleEntity, isArray: true })
   async findAll() {
@@ -39,6 +31,14 @@ export class ArticlesController {
   async findDrafts() {
     const drafts = await this.articlesService.findDrafts();
     return drafts.map((draft) => new ArticleEntity(draft));
+  }
+
+  @Post()
+  @ApiCreatedResponse({ type: ArticleEntity })
+  async create(@Body() createArticleDto: CreateArticleDto) {
+    return new ArticleEntity(
+      await this.articlesService.create(createArticleDto),
+    );
   }
 
   @Get(':id')

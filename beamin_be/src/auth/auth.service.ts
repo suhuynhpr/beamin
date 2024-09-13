@@ -1,10 +1,5 @@
 //src/auth/auth.service.ts
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { AuthEntity } from './entity/auth.entity';
@@ -12,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshDto } from './dto/refresh.dto';
+import { CustomError } from 'src/common/custom-error';
 
 @Injectable()
 export class AuthService {
@@ -44,7 +40,10 @@ export class AuthService {
 
     // If no user is found, throw an error
     if (!user) {
-      throw new NotFoundException(`No user found for email: ${email}`);
+      throw new CustomError(
+        `No user found for email: ${email}`,
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     // Step 2: Check if the password is correct
@@ -52,7 +51,7 @@ export class AuthService {
 
     // If password does not match, throw an error
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new CustomError('Invalid password', HttpStatus.UNAUTHORIZED);
     }
 
     return this.generateAuthResponse(user.id);
@@ -65,7 +64,7 @@ export class AuthService {
       where: { email: email },
     });
     if (existingUser) {
-      throw new ConflictException('Email already in use');
+      throw new CustomError('Email already in use', HttpStatus.CONFLICT);
     }
 
     // Step 2: Hash the password and create the user
@@ -83,7 +82,7 @@ export class AuthService {
     const userId = decoded.userId;
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new CustomError('User not found', HttpStatus.NOT_FOUND);
     }
 
     return this.generateAuthResponse(user.id);

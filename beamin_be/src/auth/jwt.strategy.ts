@@ -1,9 +1,10 @@
 //src/auth/jwt.strategy.ts
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { jwtSecret } from './auth.module';
 import { UsersService } from 'src/users/users.service';
+import { CustomError } from 'src/common/custom-error';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -18,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const user = await this.usersService.findOne(payload.userId);
 
     if (!user) {
-      throw new UnauthorizedException();
+      throw new CustomError('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
     return user;

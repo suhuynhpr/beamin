@@ -1,87 +1,144 @@
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
 
-// initialize the Prisma Client
 const prisma = new PrismaClient();
 
-const roundsOfHashing = 10;
-
 async function main() {
-  // create two dummy users
-  const passwordSabin = await bcrypt.hash('password-sabin', roundsOfHashing);
-  const passwordAlex = await bcrypt.hash('password-alex', roundsOfHashing);
-
-  const user1 = await prisma.user.upsert({
-    where: { email: 'sabin@adams.com' },
-    update: {
-      password: passwordSabin,
-    },
-    create: {
-      email: 'sabin@adams.com',
-      name: 'Sabin Adams',
-      password: passwordSabin,
-    },
+  // Categories
+  const categories = await prisma.category.createMany({
+    data: [
+      {
+        id: 1,
+        name: 'Pizza',
+        description: 'Delicious pizza varieties',
+        image: 'https://www.pizzahut.com/static/images/pizzas.png',
+      },
+      {
+        id: 2,
+        name: 'Burgers',
+        description: 'Juicy burgers',
+        image: 'https://www.mcdonalds.com/us/en-us/product/burgers.html',
+      },
+      {
+        id: 3,
+        name: 'Pasta',
+        description: 'Italian pasta dishes',
+        image: 'https://www.olivegarden.com/menu/pasta',
+      },
+    ],
+  });
+  // Foods
+  await prisma.food.createMany({
+    data: [
+      {
+        id: 1,
+        name: 'Pepperoni Pizza',
+        description: 'Classic pepperoni pizza',
+        price: 1200,
+        image: 'https://www.pizzahut.com/static/images/pizzas.png',
+        categoryId: 1,
+      },
+      {
+        id: 2,
+        name: 'Margherita Pizza',
+        description: 'Fresh mozzarella and tomato sauce',
+        price: 1000,
+        image: 'https://www.pizzahut.com/static/images/pizzas.png',
+        categoryId: 1,
+      },
+      {
+        id: 3,
+        name: 'Cheeseburger',
+        description: 'Classic cheeseburger',
+        price: 900,
+        image: 'https://www.mcdonalds.com/us/en-us/product/burgers.html',
+        categoryId: 2,
+      },
+      {
+        id: 4,
+        name: 'Chicken Burger',
+        description: 'Juicy chicken burger',
+        price: 1000,
+        image: 'https://www.mcdonalds.com/us/en-us/product/burgers.html',
+        categoryId: 2,
+      },
+      {
+        id: 5,
+        name: 'Spaghetti Carbonara',
+        description: 'Creamy carbonara sauce with bacon',
+        price: 1100,
+        image: 'https://www.olivegarden.com/menu/pasta',
+        categoryId: 3,
+      },
+      {
+        id: 6,
+        name: 'Lasagna',
+        description: 'Layered pasta with meat sauce',
+        price: 1200,
+        image: 'https://www.olivegarden.com/menu/pasta',
+        categoryId: 3,
+      },
+    ],
   });
 
-  const user2 = await prisma.user.upsert({
-    where: { email: 'alex@ruheni.com' },
-    update: {
-      password: passwordAlex,
-    },
-    create: {
-      email: 'alex@ruheni.com',
-      name: 'Alex Ruheni',
-      password: passwordAlex,
-    },
+  // Users
+  const users = await prisma.user.createMany({
+    data: [
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+        password:
+          '$2b$10$Q9Grd6epfIrsspNfIaGPIeFsqT0D8dO77lwQxDosUsUgtrDUR8Aa6',
+        phoneNumber: '1234567890',
+        dateOfBirth: new Date('1990-01-01'),
+        gender: 'Male',
+        profileImage: 'https://www.example.com/profile-image.png',
+        address: '123 Main Street',
+        bio: 'Software developer',
+        isEmailVerified: true,
+        lastLoginAt: new Date(),
+      },
+      {
+        id: 2,
+        name: 'Jane Doe',
+        email: 'jane.doe@example.com',
+        password:
+          '$2b$10$Q9Grd6epfIrsspNfIaGPIeFsqT0D8dO77lwQxDosUsUgtrDUR8Aa6',
+        phoneNumber: '9876543210',
+        dateOfBirth: new Date('1992-02-02'),
+        gender: 'Female',
+        profileImage: 'https://www.example.com/profile-image.png',
+        address: '456 Elm Street',
+        bio: 'Web designer',
+        isEmailVerified: true,
+        lastLoginAt: new Date(),
+      },
+    ],
   });
 
-  // create three dummy articles
-  const post1 = await prisma.article.upsert({
-    where: { title: 'Prisma Adds Support for MongoDB' },
-    update: {
-      authorId: user1.id,
-    },
-    create: {
-      title: 'Prisma Adds Support for MongoDB',
-      body: 'Support for MongoDB has been one of the most requested features since the initial release of...',
-      description:
-        "We are excited to share that today's Prisma ORM release adds stable support for MongoDB!",
-      published: false,
-      authorId: user1.id,
-    },
+  // Articles
+  await prisma.article.createMany({
+    data: [
+      {
+        id: 1,
+        title: 'Article 1',
+        description: 'This is the first article',
+        body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        authorId: 1,
+      },
+      {
+        id: 2,
+        title: 'Article 2',
+        description: 'This is the second article',
+        body: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+        authorId: 2,
+      },
+    ],
   });
 
-  const post2 = await prisma.article.upsert({
-    where: { title: "What's new in Prisma? (Q1/22)" },
-    update: {
-      authorId: user2.id,
-    },
-    create: {
-      title: "What's new in Prisma? (Q1/22)",
-      body: 'Our engineers have been working hard, issuing new releases with many improvements...',
-      description:
-        'Learn about everything in the Prisma ecosystem and community from January to March 2022.',
-      published: true,
-      authorId: user2.id,
-    },
-  });
-
-  const post3 = await prisma.article.upsert({
-    where: { title: 'Prisma Client Just Became a Lot More Flexible' },
-    update: {},
-    create: {
-      title: 'Prisma Client Just Became a Lot More Flexible',
-      body: 'Prisma Client extensions provide a powerful new way to add functionality to Prisma in a type-safe manner...',
-      description:
-        'This article will explore various ways you can use Prisma Client extensions to add custom functionality to Prisma Client..',
-      published: true,
-    },
-  });
-
-  console.log({ user1, user2, post1, post2, post3 });
+  console.log('Seed data created successfully!');
 }
 
-// execute the main function
 main()
   .catch((e) => {
     console.error(e);

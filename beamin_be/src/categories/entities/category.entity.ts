@@ -1,13 +1,11 @@
 // src/users/entities/user.entity.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { Category, Food } from '@prisma/client';
+import { Category } from '@prisma/client';
 
-export class FoodEntity implements Food {
-  constructor(partial: Partial<FoodEntity>) {
+export class CategoryEntity implements Category {
+  constructor(partial: Partial<CategoryEntity>) {
     Object.assign(this, partial);
   }
-  updatedAt: Date;
-  categoryId: number;
 
   @ApiProperty()
   id: number;
@@ -19,14 +17,11 @@ export class FoodEntity implements Food {
   description: string;
 
   @ApiProperty()
-  price: number;
-
-  @ApiProperty()
   image: string;
 
   @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
-  category: Category;
+  updatedAt: Date;
 }

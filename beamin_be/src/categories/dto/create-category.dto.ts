@@ -1,9 +1,9 @@
 // src/users/dto/create-user.dto.ts
 
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
-export class CreateFoodDto {
+export class CreateCategoryDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
@@ -15,17 +15,7 @@ export class CreateFoodDto {
   description: string;
 
   @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  price: number;
-
-  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   image: string;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsNotEmpty()
-  categoryId: number;
 }
