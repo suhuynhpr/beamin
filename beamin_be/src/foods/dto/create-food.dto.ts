@@ -28,4 +28,9 @@ export class CreateFoodDto {
   @IsNumber()
   @IsNotEmpty()
   categoryId: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsNotEmpty()
+  address: string;
 }

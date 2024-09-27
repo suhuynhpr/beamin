@@ -8,6 +8,8 @@ export class FoodEntity implements Food {
   }
   updatedAt: Date;
   categoryId: number;
+  kind: string;
+  address: string;
 
   @ApiProperty()
   id: number;

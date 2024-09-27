@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-// Cách sử dụng:
-// Khởi tạo cơ sở dữ liệu: npx prisma db push
-// Tạo client Prisma: npx prisma generate
 generator client {
   provider = "prisma-client-js"
 }
@@ -20,13 +15,8 @@ model Article {
   published   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  author      User?    @relation(fields: [authorId], references: [id])
   authorId    Int?
-}
-
-enum Gender {
-  Male
-  Female
+  author      User?    @relation(fields: [authorId], references: [id])
 }
 
 model User {
@@ -52,14 +42,17 @@ model User {
 model Food {
   id          Int      @id @default(autoincrement())
   name        String
-  description String
-  price       Int
-  image       String
+  address     String
+  description String?
+  price       Int?
+  kind        String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  category    Category @relation(fields: [categoryId], references: [id])
   categoryId  Int
+  image       String?
+  category    Category @relation(fields: [categoryId], references: [id])
   Order       Order[]
+  stock       Int      @default(0)
 }
 
 model Category {
@@ -72,14 +65,6 @@ model Category {
   foods       Food[]
 }
 
-enum statusOrder {
-  Pending
-  Confirmed
-  InProgress
-  Completed
-  Canceled
-}
-
 model Order {
   id         Int         @id @default(autoincrement())
   userId     Int
@@ -89,6 +74,19 @@ model Order {
   status     statusOrder @default(Pending)
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
-  user       User        @relation(fields: [userId], references: [id])
   food       Food        @relation(fields: [foodId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+}
+
+enum Gender {
+  Male
+  Female
+}
+
+enum statusOrder {
+  Pending
+  Confirmed
+  InProgress
+  Completed
+  Canceled
 }

@@ -4,18 +4,18 @@ import { CreateFoodDto } from './dto/create-food.dto';
 import { UpdateFoodDto } from './dto/update-food.dto';
 @Injectable()
 export class FoodsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getAllFoods(page: number, limit: number, search?: string) {
     const skip = (page - 1) * limit;
     const where = search
       ? {
-          OR: [
-            { name: { contains: search } },
-            { description: { contains: search } },
-            { category: { name: { contains: search } } },
-          ],
-        }
+        OR: [
+          { name: { contains: search } },
+          { description: { contains: search } },
+          { category: { name: { contains: search } } },
+        ],
+      }
       : {};
 
     const [foods, total] = await this.prisma.$transaction([

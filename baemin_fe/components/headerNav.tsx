@@ -9,7 +9,7 @@ import {
   SolutionOutlined,
   ShoppingCartOutlined,
 } from "@ant-design/icons";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { getAuthUser } from "@/app/apis/auth.api";
@@ -20,6 +20,7 @@ export default function HeaderNav() {
   const [user, setUser] = useAtom(userAtom);
 
   const router = useRouter();
+  const pathname = usePathname();
   const onSearch: SearchProps["onSearch"] = (value, _e, info) => {
     router.push("/search?value=" + value);
   };
@@ -31,11 +32,8 @@ export default function HeaderNav() {
       setUser(data.data);
       return data.data;
     },
+    enabled: pathname !== "/login" && pathname !== "/register",
   });
-
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
 
   return (
     <div className="w-full h-fix bg-white flex flex-row fixed  py-3 gap-4 justify-items-center	justify-center z-50	">

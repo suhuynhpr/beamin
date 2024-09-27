@@ -26,7 +26,7 @@ import { CustomError } from 'src/common/custom-error';
 @Controller('foods')
 @ApiTags('Foods')
 export class FoodsController {
-  constructor(private readonly foodsService: FoodsService) {}
+  constructor(private readonly foodsService: FoodsService) { }
 
   @Get()
   @ApiOperation({ summary: 'Get all foods with pagination and search' })

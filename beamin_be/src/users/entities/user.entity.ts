@@ -17,6 +17,7 @@ export class UserEntity implements User {
   bio: string;
   isEmailVerified: boolean;
   lastLoginAt: Date;
+  permision: string;
 
   @ApiProperty()
   id: number;

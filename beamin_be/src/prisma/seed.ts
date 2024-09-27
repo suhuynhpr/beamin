@@ -4,87 +4,93 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Categories
-  const categories = await prisma.category.createMany({
+  await prisma.category.createMany({
     data: [
       {
-        id: 1,
         name: 'Pizza',
         description: 'Delicious pizza varieties',
-        image: 'https://www.pizzahut.com/static/images/pizzas.png',
+        image:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
       },
       {
-        id: 2,
         name: 'Burgers',
         description: 'Juicy burgers',
-        image: 'https://www.mcdonalds.com/us/en-us/product/burgers.html',
+        image:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
       },
       {
-        id: 3,
         name: 'Pasta',
         description: 'Italian pasta dishes',
-        image: 'https://www.olivegarden.com/menu/pasta',
+        image:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
       },
     ],
   });
-  // Foods
+  //Foods
   await prisma.food.createMany({
     data: [
       {
-        id: 1,
         name: 'Pepperoni Pizza',
         description: 'Classic pepperoni pizza',
         price: 1200,
-        image: 'https://www.pizzahut.com/static/images/pizzas.png',
+        image:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
         categoryId: 1,
+        kind: 'pizza',
+        address: '123 Main Street',
       },
       {
-        id: 2,
         name: 'Margherita Pizza',
         description: 'Fresh mozzarella and tomato sauce',
         price: 1000,
-        image: 'https://www.pizzahut.com/static/images/pizzas.png',
+        image:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
         categoryId: 1,
+        address: '123 Main Street',
       },
       {
-        id: 3,
         name: 'Cheeseburger',
         description: 'Classic cheeseburger',
         price: 900,
-        image: 'https://www.mcdonalds.com/us/en-us/product/burgers.html',
+        image:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
         categoryId: 2,
+        address: '123 Main Street',
       },
       {
-        id: 4,
         name: 'Chicken Burger',
         description: 'Juicy chicken burger',
         price: 1000,
-        image: 'https://www.mcdonalds.com/us/en-us/product/burgers.html',
+        image:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
         categoryId: 2,
+        address: '123 Main Street',
       },
       {
-        id: 5,
         name: 'Spaghetti Carbonara',
         description: 'Creamy carbonara sauce with bacon',
         price: 1100,
-        image: 'https://www.olivegarden.com/menu/pasta',
+        image:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
         categoryId: 3,
+        address: '123 Main Street',
       },
       {
-        id: 6,
         name: 'Lasagna',
         description: 'Layered pasta with meat sauce',
         price: 1200,
-        image: 'https://www.olivegarden.com/menu/pasta',
+        image:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
         categoryId: 3,
+        address: '123 Main Street',
       },
     ],
   });
 
   // Users
-  const users = await prisma.user.createMany({
+  await prisma.user.createMany({
     data: [
       {
-        id: 1,
         name: 'John Doe',
         email: 'john.doe@example.com',
         password:
@@ -92,14 +98,15 @@ async function main() {
         phoneNumber: '1234567890',
         dateOfBirth: new Date('1990-01-01'),
         gender: 'Male',
-        profileImage: 'https://www.example.com/profile-image.png',
+        profileImage:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
         address: '123 Main Street',
         bio: 'Software developer',
         isEmailVerified: true,
         lastLoginAt: new Date(),
+        permision: 'user',
       },
       {
-        id: 2,
         name: 'Jane Doe',
         email: 'jane.doe@example.com',
         password:
@@ -107,27 +114,59 @@ async function main() {
         phoneNumber: '9876543210',
         dateOfBirth: new Date('1992-02-02'),
         gender: 'Female',
-        profileImage: 'https://www.example.com/profile-image.png',
+        profileImage:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
         address: '456 Elm Street',
         bio: 'Web designer',
         isEmailVerified: true,
         lastLoginAt: new Date(),
+        permision: 'user',
+      },
+      {
+        name: 'Jane Doe',
+        email: 'jane.doe@example.com',
+        password:
+          '$2b$10$Q9Grd6epfIrsspNfIaGPIeFsqT0D8dO77lwQxDosUsUgtrDUR8Aa6',
+        phoneNumber: '9876543210',
+        dateOfBirth: new Date('1992-02-02'),
+        gender: 'Female',
+        profileImage:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
+        address: '456 Elm Street',
+        bio: 'Web designer',
+        isEmailVerified: true,
+        lastLoginAt: new Date(),
+        permision: 'user',
+      },
+      {
+        name: 'Jane Doe',
+        email: 'admin@gmail.com',
+        password:
+          '$2b$10$Q9Grd6epfIrsspNfIaGPIeFsqT0D8dO77lwQxDosUsUgtrDUR8Aa6',
+        phoneNumber: '9876543210',
+        dateOfBirth: new Date('1992-02-02'),
+        gender: 'Female',
+        profileImage:
+          'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
+        address: '456 Elm Street',
+        bio: 'Web designer',
+        isEmailVerified: true,
+        lastLoginAt: new Date(),
+        permision: 'admin',
       },
     ],
   });
 
-  // Articles
+  //Articles
   await prisma.article.createMany({
     data: [
       {
-        id: 1,
         title: 'Article 1',
         description: 'This is the first article',
         body: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
         authorId: 1,
       },
       {
-        id: 2,
         title: 'Article 2',
         description: 'This is the second article',
         body: 'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
