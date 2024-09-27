@@ -2,7 +2,7 @@
 import { Button, Select } from "antd";
 import { SearchProps } from "antd/es/input";
 import Search from "antd/es/input/Search";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   HomeOutlined,
   SearchOutlined,
@@ -11,15 +11,32 @@ import {
 } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { getAuthUser } from "@/app/apis/auth.api";
+import { useAtom } from "jotai";
+import { userAtom } from "@/app/store/user.store";
 
 export default function HeaderNav() {
+  const [user, setUser] = useAtom(userAtom);
+
   const router = useRouter();
   const onSearch: SearchProps["onSearch"] = (value, _e, info) => {
-    router.push("/sreach");
+    router.push("/search?value=" + value);
   };
-  const navigation = () => {
-    router.push("/dashboard");
-  };
+
+  const queryUser = useQuery({
+    queryKey: ["user"],
+    queryFn: () => getAuthUser(),
+    select: (data) => {
+      setUser(data.data);
+      return data.data;
+    },
+  });
+
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
+
   return (
     <div className="w-full h-fix bg-white flex flex-row fixed  py-3 gap-4 justify-items-center	justify-center z-50	">
       <Link href="/dashboard">
@@ -72,20 +89,24 @@ export default function HeaderNav() {
             Trang Chủ
           </Button>
         </Link>
-        <Link href="/login">
-          <Button
-            className="font-normal  leading-5 btn-home	"
-            style={{
-              fontSize: "18px",
-              height: "100%",
-              color: "rgb(128, 128, 137)",
-            }}
-            type="text"
-            icon={<SolutionOutlined />}
-          >
-            Tài Khoản
-          </Button>
-        </Link>
+        {user?.email ? (
+          user?.email.split("@")[0]
+        ) : (
+          <Link href="/login">
+            <Button
+              className="font-normal  leading-5 btn-home	"
+              style={{
+                fontSize: "18px",
+                height: "100%",
+                color: "rgb(128, 128, 137)",
+              }}
+              type="text"
+              icon={<SolutionOutlined />}
+            >
+              Tài Khoản
+            </Button>
+          </Link>
+        )}
 
         <Link href="/cart">
           <Button

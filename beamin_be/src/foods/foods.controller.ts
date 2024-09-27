@@ -70,6 +70,14 @@ export class FoodsController {
   async createFood(
     @Body() createFoodDto: CreateFoodDto,
   ): Promise<{ success: boolean; data: FoodEntity }> {
+    // Check if the food already exists
+    const existingFood = await this.foodsService.getFoodByName(
+      createFoodDto.name,
+    );
+
+    if (existingFood) {
+      throw new CustomError('Food already exists', HttpStatus.BAD_REQUEST);
+    }
     const food = await this.foodsService.createFood(createFoodDto);
     return {
       success: true,
@@ -106,10 +114,6 @@ export class FoodsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiResponse({ status: 200, type: FoodEntity })
-  @ApiResponse({
-    status: 404,
-    description: 'Food not found',
-  })
   async deleteFood(
     @Param('id') id: string,
   ): Promise<{ success: boolean; data: FoodEntity }> {

@@ -14,7 +14,10 @@ export class CreateCategoryDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    example:
+      'https://cdn-icons-png.freepik.com/512/1404/1404945.png?ga=GA1.1.1183214101.1726492474',
+  })
   @IsString()
   @IsNotEmpty()
   image: string;

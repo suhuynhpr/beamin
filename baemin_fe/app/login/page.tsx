@@ -4,13 +4,31 @@ import {
   EyeTwoTone,
   FacebookOutlined,
   GoogleOutlined,
+  LockOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
-import { Input } from "antd";
+import { useMutation } from "@tanstack/react-query";
+import { Button, Form, Input } from "antd";
 import Link from "next/link";
 import React from "react";
-
+import { login } from "../apis/auth.api";
+import { useRouter } from "next/navigation";
 const Page: React.FC = () => {
-  const [passwordVisible, setPasswordVisible] = React.useState(false);
+  const router = useRouter();
+  const handleNavigate = () => {
+    router.push("/");
+  };
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: (body: any) => login(body),
+    onSuccess: (e) => {
+      window.localStorage.setItem("token", e.data.data.access_token);
+      handleNavigate();
+    },
+  });
+
+  const onFinish = (values: any) => {
+    mutate(values);
+  };
 
   return (
     <>
@@ -18,30 +36,62 @@ const Page: React.FC = () => {
         <div className="flex justify-center items-center w-full text-beamin font-semibold text-[26px]">
           Đăng Nhập
         </div>
-        <div className="flex flex-col w-full gap-3">
-          <Input
-            placeholder="Email/Số điện thoại/Tên đăng nhập"
-            className="h-[40px]"
-          />
-        </div>
-        <div className="flex flex-col w-full mt-3">
-          <Input.Password
-            placeholder="Mật khẩu"
-            className="h-[40px]"
-            iconRender={(visible) =>
-              visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
-            }
-          />
-        </div>
-        <div className="flex flex-col w-full mt-3">
-          <button className="w-full h-[40px] uppercase text-white bg-beamin rounded-lg">
-            Đăng Nhập
-          </button>
-          {/* <div className="flex flex-row justify-end items-center w-full text-sm text-beamin mt-2">
+        <Form onFinish={onFinish}>
+          <div className="flex flex-col w-full gap-3">
+            <Form.Item
+              name={["email"]}
+              rules={[
+                { required: true, message: "Vui lòng nhập" },
+                { type: "email", message: "Không đúng định dạng" },
+              ]}
+            >
+              <Input
+                prefix={<UserOutlined />}
+                placeholder="Email"
+                className="h-[40px]"
+              />
+            </Form.Item>
+          </div>
+          <div className="flex flex-col w-full mt-3">
+            <Form.Item
+              name={["password"]}
+              rules={[
+                { required: true, message: "Vui lòng nhập" },
+                { min: 6, message: "Tối thiểu 6 ký tự" },
+              ]}
+            >
+              <Input.Password
+                placeholder="Mật khẩu"
+                className="h-[40px]"
+                prefix={<LockOutlined />}
+                iconRender={(visible) =>
+                  visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                }
+              />
+            </Form.Item>
+          </div>
+
+          <div className="flex flex-col w-full mt-3">
+            <Form.Item>
+              <Button
+                htmlType="submit"
+                className="w-full h-[40px] uppercase text-white rounded-lg"
+                type="primary"
+                loading={isPending}
+                style={{
+                  backgroundColor: "rgb(58 197 201)",
+                  borderColor: "rgb(58 197 201)",
+                }}
+              >
+                Đăng Nhập
+              </Button>
+            </Form.Item>
+            {/* <div className="flex flex-row justify-end items-center w-full text-sm text-beamin mt-2">
             <span className="cursor-pointer">Quên mật khẩu </span>
             <span className="cursor-pointer">Đăng nhập bằng SMS </span>
           </div> */}
-        </div>
+          </div>
+        </Form>
         {/* <div className="flex items-center justify-center">
           <div className="flex-grow border-t border-gray-300"></div>
           <span className="mx-4 text-sm text-gray-600">HOẶC</span>

@@ -40,6 +40,10 @@ export class CategoriesService {
     return this.prisma.category.findUnique({ where: { id } });
   }
 
+  async findOneByName(name: string): Promise<CategoryEntity> {
+    return this.prisma.category.findFirst({ where: { name } });
+  }
+
   async create(data: CreateCategoryDto): Promise<CategoryEntity> {
     return this.prisma.category.create({ data });
   }

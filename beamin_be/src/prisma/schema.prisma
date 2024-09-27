@@ -40,11 +40,13 @@ model User {
   profileImage    String?
   address         String?
   bio             String?
+  permision       String?   @default("user")
   isEmailVerified Boolean   @default(false)
   lastLoginAt     DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   articles        Article[]
+  Order           Order[]
 }
 
 model Food {
@@ -57,6 +59,7 @@ model Food {
   updatedAt   DateTime @updatedAt
   category    Category @relation(fields: [categoryId], references: [id])
   categoryId  Int
+  Order       Order[]
 }
 
 model Category {
@@ -67,4 +70,25 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   foods       Food[]
+}
+
+enum statusOrder {
+  Pending
+  Confirmed
+  InProgress
+  Completed
+  Canceled
+}
+
+model Order {
+  id         Int         @id @default(autoincrement())
+  userId     Int
+  foodId     Int
+  quantity   Int
+  totalPrice Int
+  status     statusOrder @default(Pending)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id])
+  food       Food        @relation(fields: [foodId], references: [id])
 }

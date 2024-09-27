@@ -4,10 +4,5 @@ import Layout from "./layout";
 import FooterNav from "@/components/footerNav";
 
 export default function Home() {
-  return (
-  <>
-   
-  
-  </>
-  )
+  return <>12321</>;
 }

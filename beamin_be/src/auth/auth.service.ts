@@ -14,7 +14,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   private generateAuthResponse(userId: number): AuthEntity {
     const accessToken = this.jwtService.sign({ userId }, { expiresIn: '1h' });
@@ -57,7 +57,7 @@ export class AuthService {
     return this.generateAuthResponse(user.id);
   }
 
-  async signup(body: SignupDto): Promise<AuthEntity> {
+  async signup(body: SignupDto): Promise<{ success: boolean }> {
     const { email, password, name } = body;
     // Step 1: Check if the email is already in use
     const existingUser = await this.prisma.user.findUnique({
@@ -72,8 +72,13 @@ export class AuthService {
     const user = await this.prisma.user.create({
       data: { name, email, password: hashedPassword },
     });
-
-    return this.generateAuthResponse(user.id);
+    if (!user.id) {
+      throw new CustomError(
+        'Failed to create user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+    return { success: true };
   }
 
   async refresh(body: RefreshDto): Promise<AuthEntity> {
@@ -86,5 +91,16 @@ export class AuthService {
     }
 
     return this.generateAuthResponse(user.id);
+  }
+
+  async findUser(token: string) {
+    const decoded = this.jwtService.verify(token);
+    const userId = parseInt(decoded.userId);
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) {
+      throw new CustomError('User not found', HttpStatus.NOT_FOUND);
+    }
+    return user;
   }
 }

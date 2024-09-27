@@ -34,6 +34,10 @@ export class FoodsService {
     return this.prisma.food.findUnique({ where: { id } });
   }
 
+  async getFoodByName(name: string) {
+    return this.prisma.food.findFirst({ where: { name } });
+  }
+
   async createFood(data: CreateFoodDto) {
     return this.prisma.food.create({ data });
   }
